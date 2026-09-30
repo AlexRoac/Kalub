@@ -1,0 +1,7 @@
+import { AlertTriangle, CheckCircle2, Info, ThermometerSun, Zap } from 'lucide-react'
+import { Panel } from '../components/UI'
+import { alerts } from '../data/alerts'
+import { useTranslation } from 'react-i18next'
+
+const icons = { critical: Zap, warning: ThermometerSun, info: Info, success: CheckCircle2 }
+export function Alerts() { const { t } = useTranslation(); const keys = ['critical','warning','opportunity','system']; return <div className="page"><div className="alert-stats"><div><strong>3</strong><span>{t('alerts.active')}</span></div><div><strong>2</strong><span>{t('alerts.opportunities')}</span></div><div><strong>0</strong><span>{t('alerts.critical')}</span></div><div><strong>99.98%</strong><span>{t('alerts.availability')}</span></div></div><Panel title={t('alerts.recent')} subtitle={t('alerts.recommendations')}><div className="alerts-list">{alerts.map((alert, i) => { const Icon = icons[alert.severity as keyof typeof icons], key = keys[i]; return <article key={i} className={`alert ${alert.severity}`}><div className="alert-icon"><Icon size={20}/></div><div><div className="alert-heading"><b>{t(`alerts.${key}Title`)}</b><span>{i === 3 ? t('alerts.hourAgo') : t('alerts.minAgo', { count:[4,12,26][i] })}</span></div><h3>{alert.source}</h3><p>{t(`alerts.${key}Text`)}</p><small>{t(`alerts.${key}Detail`)}</small></div><button aria-label="Alert actions">•••</button></article> })}</div></Panel><div className="alerts-footer"><AlertTriangle size={15}/> {t('alerts.footer')}</div></div> }

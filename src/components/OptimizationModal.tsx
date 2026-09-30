@@ -1,0 +1,15 @@
+import { Check, LoaderCircle, ShieldCheck, X, Zap } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import type { GPU } from '../types'
+import { useTranslation } from 'react-i18next'
+
+export function OptimizationModal({ gpu, onClose, onToast }: { gpu: GPU; onClose: () => void; onToast: (s: string) => void }) {
+  const { t } = useTranslation()
+  const stages = t('modal.stages', { returnObjects: true }) as string[]
+  const [mode, setMode] = useState<'confirm'|'running'|'success'>('confirm')
+  const [stage, setStage] = useState(0)
+  useEffect(() => { if (mode !== 'running') return; if (stage >= stages.length) { setMode('success'); onToast(t('modal.profileCompleted')); return } const id = setTimeout(() => setStage(s => s + 1), 650); return () => clearTimeout(id) }, [mode, stage, onToast, stages.length, t])
+  return <div className="modal-backdrop" onMouseDown={e => e.target === e.currentTarget && onClose()}><div className="modal"><button className="modal-close" onClick={onClose}><X size={18}/></button>{mode === 'confirm' && <><div className="modal-icon"><Zap/></div><h2>{t('modal.title')}</h2><p>{t('modal.description',{gpu:gpu.id})}</p><div className="modal-values"><div><span>{t('modal.currentLimit')}</span><strong>700 W</strong></div><div className="arrow">→</div><div><span>{t('common.recommended')}</span><strong className="green">600 W</strong></div></div><div className="modal-impact"><p><span>{t('modal.expectedReduction')}</span><strong>14.3%</strong></p><p><span>{t('modal.expectedImpact')}</span><strong>-1.3%</strong></p></div><div className="modal-actions"><button className="secondary" onClick={onClose}>{t('common.cancel')}</button><button className="primary" onClick={() => {setMode('running'); onToast(t('optimization.started'))}}>{t('modal.simulate')}</button></div></>}
+    {mode === 'running' && <div className="simulation"><LoaderCircle className="spin large-spinner"/><h2>{t('modal.optimizing',{gpu:gpu.id})}</h2><p>{t('modal.testing')}</p><div>{stages.map((s, i) => <p className={i < stage ? 'done' : i === stage ? 'active' : ''} key={s}><span>{i < stage ? <Check size={14}/> : i === stage ? <LoaderCircle className="spin" size={14}/> : i+1}</span>{s}…</p>)}</div></div>}
+    {mode === 'success' && <div className="success-view"><div className="success-icon"><Check/></div><h2>{t('modal.success')}</h2><p>{t('modal.successText')}</p><div className="result-list"><p><span>Power Limit</span><del>700 W</del><b>600 W</b></p><p><span>{t('modal.consumption')}</span><del>650 W</del><b>558 W</b></p><p><span>{t('gpu.temperature')}</span><del>68°C</del><b>61°C</b></p><p><span>{t('modal.performance')}</span><del>100%</del><b>98.7%</b></p></div><div className="success-impact"><span>{t('modal.efficiency')} <b>+15.1%</b></span><span>{t('modal.estimatedSavings')} <b>$162 {t('common.perMonth')}</b></span></div><button className="primary full" onClick={onClose}>{t('modal.viewResults')}</button><small><ShieldCheck size={13}/> {t('modal.complete')}</small></div>}</div></div>
+}
